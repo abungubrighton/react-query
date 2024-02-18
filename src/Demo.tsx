@@ -1,10 +1,12 @@
-import { useQuery ,useMutation} from "react-query";
+import { useQuery ,useMutation, useQueryClient} from "react-query";
 import { addTodo, fetchTodos } from "./api";
 import TodoCard from "./components/TodoCard";
 import { useState } from "react";
 export default function Demo() {
   // form state
-  const [title, setTitle] = useState("")
+  const [title, setTitle] = useState("");
+  // invalidating cache
+  const queryClient = useQueryClient();
   // Query todos
   const { data: todos, isLoading } = useQuery({
     queryFn: ()=> fetchTodos(),
@@ -13,7 +15,10 @@ export default function Demo() {
 
 // make changes to DB or object in memory
   const { mutateAsync: addTodoMutation } = useMutation({
-    mutationFn:addTodo
+    mutationFn: addTodo,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["todos"]);
+    }
   });
 
   if (isLoading) { 
